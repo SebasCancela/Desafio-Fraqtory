@@ -4,9 +4,13 @@ import numpy as np
 
 input_folder = 'videos'
 output_folder = 'frames_extracted'
+dataset_root = "model/data"   
 n = 500  # Number of evenly spaced frames to extract
 
 os.makedirs(output_folder, exist_ok=True)
+
+dataset_imgs_dir = os.path.join(dataset_root, "images")
+os.makedirs(dataset_imgs_dir, exist_ok=True)
 
 for filename in os.listdir(input_folder):
     if filename.endswith('.mp4'):
@@ -29,9 +33,10 @@ for filename in os.listdir(input_folder):
             if not ret:
                 break
             if frame_count in selected_set:
-                frame_filename = f'frame_{frame_count:05d}.jpg'
-                frame_path = os.path.join(frame_output_dir, frame_filename)
+                fname = f'frame_{frame_count:05d}.jpg'
+                frame_path = os.path.join(frame_output_dir, fname)
                 cv2.imwrite(frame_path, frame)
+                cv2.imwrite(os.path.join(dataset_imgs_dir, f'{video_name}_{fname}'), frame)
                 saved_count += 1
             frame_count += 1
 

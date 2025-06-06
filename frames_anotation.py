@@ -6,10 +6,10 @@ import copy
 annotation_file = 'json_files/points_positions.json'
 output_json = 'json_files/copied_annotations.json'
 
-base_video_path = 'processed_frames'
+base_video_path = 'frames_extracted'
 video_folders = [f'video_{i}' for i in range(1, 5)]
 
-with open('json_files/points_positions.json', 'r') as f:
+with open(annotation_file, 'r') as f:
     data = json.load(f)
     
 for i, video_id in enumerate(['video_1','video_2', 'video_3', 'video_4']):
@@ -28,8 +28,8 @@ video_to_annotation = {
 }
 
 for video_folder in video_folders:
-    frame_dir = os.path.join(base_video_path, video_folder, 'undistorted')
-    output_image_dir = os.path.join(base_video_path, video_folder, 'annotated')
+    frame_dir = os.path.join(base_video_path, video_folder)
+    output_image_dir = os.path.join('frames_annotated', video_folder)
     os.makedirs(output_image_dir, exist_ok=True)
 
     base = video_to_annotation.get(video_folder)

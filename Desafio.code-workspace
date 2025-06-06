@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "model/trained_models"
+		}
+	],
+	"settings": {}
+}

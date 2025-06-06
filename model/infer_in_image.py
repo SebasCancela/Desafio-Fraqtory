@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from postprocess import postprocess, refine_kps
 from homography import get_trans_matrix, refer_kps
 import argparse
+from preprocess import *
 
 if __name__ == '__main__':
 
@@ -23,10 +24,11 @@ if __name__ == '__main__':
     model.load_state_dict(torch.load(args.model_path, map_location=device))
     model.eval()
     
-    OUTPUT_WIDTH = int(2688 / 4.2)
-    OUTPUT_HEIGHT = int(1512 / 4.2)
+    OUTPUT_WIDTH = 640
+    OUTPUT_HEIGHT = 360
 
     image = cv2.imread(args.input_path)
+    image = undistort_and_resize(image, None, 1280, 720)
     img = cv2.resize(image, (OUTPUT_WIDTH, OUTPUT_HEIGHT))
     inp = (img.astype(np.float32) / 255.)
     inp = torch.tensor(np.rollaxis(inp, 2, 0))

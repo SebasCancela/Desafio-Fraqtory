@@ -48,12 +48,12 @@ def convert_labelstudio(json_path):
             label = kp['value']['keypointlabels'][0]
             x_pct = kp['value']['x']
             y_pct = kp['value']['y']
-            new_w = 1280
-            new_h = 720
+            orig_w = kp['original_width']
+            orig_h = kp['original_height']
             
             # Convert from percent to absolute pixel coordinates
-            x_abs = x_pct / 100.0 * new_w
-            y_abs = y_pct / 100.0 * new_h
+            x_abs = x_pct / 100.0 * orig_w
+            y_abs = y_pct / 100.0 * orig_h
 
             coords_by_label[label] = [round(x_abs), round(y_abs)]
 

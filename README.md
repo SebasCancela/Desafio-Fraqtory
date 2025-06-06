@@ -36,4 +36,3 @@ Os novos frames são guardados em `model/augmented_data/images`, e os dados são
 6. `model`
 
 Pasta com o modelo utilizado, `https://github.com/yastrebksv/TennisCourtDetector`, e onde também foram criadas as pastas `data`, `augmented_data`, `trained_models` (com os 2 modelos que foram treinados) e `results` (para se verificar o resultado do modelo quando se escolhe uma imagem para prever os pontos)
-
