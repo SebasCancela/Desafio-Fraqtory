@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_homography', action='store_true', help='whether to use homography postprocessing')
     args = parser.parse_args()
 
-    val_dataset = courtDataset('val')
+    val_dataset = courtDataset('test')
     val_loader = torch.utils.data.DataLoader(
         val_dataset,
         batch_size=args.batch_size,
@@ -30,8 +30,8 @@ if __name__ == '__main__':
         pin_memory=True
     )
 
-    model = BallTrackerNet(out_channels=15)
-    device = 'cuda'
+    model = BallTrackerNet(out_channels=9)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.load_state_dict(torch.load(args.model_path, map_location=device))
     model = model.to(device)
     model.eval()
@@ -52,12 +52,12 @@ if __name__ == '__main__':
 
             pred = F.sigmoid(out).detach().cpu().numpy()
             for bs in range(batch_size):
-                img = cv2.imread(os.path.join(val_dataset.path_dataset, 'images', img_names[bs] + '.png'))
+                img = cv2.imread(os.path.join(val_dataset.path_dataset, 'images', img_names[bs] + '.jpg'))
                 points_pred = []
-                for kps_num in range(14):
+                for kps_num in range(8):
                     heatmap = (pred[bs][kps_num] * 255).astype(np.uint8)
-                    x_pred, y_pred = postprocess(heatmap, low_thresh=170, max_radius=25)
-                    if args.use_refine_kps and kps_num not in [8, 12, 9] and x_pred and y_pred:
+                    x_pred, y_pred = postprocess(heatmap)
+                    if args.use_refine_kps and x_pred and y_pred:
                         x_pred, y_pred = refine_kps(img, int(y_pred), int(x_pred))
                     points_pred.append((x_pred, y_pred))
 

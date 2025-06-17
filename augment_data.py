@@ -8,20 +8,14 @@ import albumentations as A
 random.seed(42)
 
 LABEL_ORDER = [
-    "top_left_corner",
-    "top_right_corner",
-    "bottom_right_corner",
-    "bottom_left_corner",
     "left_service_box_top",
     "right_service_box_top",
-    "right_service_box_bottom",
     "left_service_box_bottom",
-    "center_line_top",
-    "center_line_bottom",
+    "right_service_box_bottom",
     "net_top_left",
     "net_top_right",
-    "net_bottom_right",
-    "net_bottom_left"
+    "net_bottom_left",
+    "net_bottom_right"
 ]
 
 INPUT_JSON = "./json_files/copied_annotations.json"
@@ -29,13 +23,12 @@ INPUT_IMG_DIR = "./model/data/images"
 OUTPUT_IMG_DIR = "./model/augmented_data/images"
 OUTPUT_JSON = "./model/augmented_data/data_train.json"
 OUTPUT_VAL_JSON = "./model/augmented_data/data_val.json"
-VAL_SPLIT = 0.2
+OUTPUT_TEST_JSON = "./model/augmented_data/data_test.json"
+
 os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
 
-# Albumentations pipelines
 augmentations = [
-    A.Compose([A.VerticalFlip(p=1.0)], keypoint_params=A.KeypointParams(format='xy', remove_invisible=False)),
-    A.Compose([A.HorizontalFlip(p=1.0), A.VerticalFlip(p=1.0)], keypoint_params=A.KeypointParams(format='xy', remove_invisible=False)),
+    A.Compose([A.HorizontalFlip(p=1.0)], keypoint_params=A.KeypointParams(format='xy', remove_invisible=False)),
     A.Compose([A.RandomBrightnessContrast(p=0.5), A.HueSaturationValue(hue_shift_limit=20, p=1.0)], keypoint_params=A.KeypointParams(format='xy', remove_invisible=False)),
     A.Compose([A.HorizontalFlip(p=1.0), A.HueSaturationValue(hue_shift_limit=20, p=1.0)], keypoint_params=A.KeypointParams(format='xy', remove_invisible=False))
 ]
@@ -51,7 +44,7 @@ for task in data:
     image_filename = os.path.basename(image_path)
     image_base = os.path.splitext(image_filename)[0]
     video_id = os.path.basename(task['data']['video_id'])
-    new_image_id = f"{video_id}_{image_base}"
+    new_image_id = f"{image_base}"
 
     annotations = task['annotations'][0]['result']
     coords_by_label = {}
@@ -60,12 +53,12 @@ for task in data:
         label = kp['value']['keypointlabels'][0]
         x_pct = kp['value']['x']
         y_pct = kp['value']['y']
-        new_w = 1280
-        new_h = 720
+        w = 2688
+        h = 1520
             
         # Convert from percent to absolute pixel coordinates
-        x_abs = x_pct / 100.0 * new_w
-        y_abs = y_pct / 100.0 * new_h
+        x_abs = x_pct / 100.0 * w
+        y_abs = y_pct / 100.0 * h
 
         coords_by_label[label] = [round(x_abs), round(y_abs)]
 
@@ -100,19 +93,26 @@ for task in data:
 
     augmented_samples.append({"id": aug_img_name[:-4], "kps": aug_kps})
 
-# Split train and validation
+# Split into 70% train, 15% val, 15% test
 random.shuffle(augmented_samples)
-split_idx = int(len(augmented_samples) * (1 - VAL_SPLIT))
-train_samples = augmented_samples[:split_idx]
-val_samples = augmented_samples[split_idx:]
+n = len(augmented_samples)
+train_end = int(n * 0.7)
+val_end = int(n * 0.85)
 
-# Save JSONs
+train_samples = augmented_samples[:train_end]
+val_samples = augmented_samples[train_end:val_end]
+test_samples = augmented_samples[val_end:]
+
 with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
     json.dump(train_samples, f, indent=2)
 
 with open(OUTPUT_VAL_JSON, "w", encoding="utf-8") as f:
     json.dump(val_samples, f, indent=2)
 
-print(f"✅ Augmented dataset saved to {OUTPUT_JSON} and {OUTPUT_VAL_JSON}")
-print(f"➡ Training samples: {len(train_samples)}")
-print(f"➡ Validation samples: {len(val_samples)}")
+with open(OUTPUT_TEST_JSON, "w", encoding="utf-8") as f:
+    json.dump(test_samples, f, indent=2)
+
+print(f"✅ Augmented dataset saved.")
+print(f"➡ Train: {len(train_samples)} samples -> {OUTPUT_JSON}")
+print(f"➡ Val:   {len(val_samples)} samples -> {OUTPUT_VAL_JSON}")
+print(f"➡ Test:  {len(test_samples)} samples -> {OUTPUT_TEST_JSON}")

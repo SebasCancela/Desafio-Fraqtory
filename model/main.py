@@ -38,7 +38,7 @@ if __name__ == '__main__':
         pin_memory=False
     )
 
-    model = BallTrackerNet(out_channels=15)
+    model = BallTrackerNet(out_channels=9)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = model.to(device)
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         train_loss = train(model, train_loader, optimizer, criterion, device, epoch, args.steps_per_epoch)
         log_writer.add_scalar('Train/training_loss', train_loss, epoch)
 
-        if (epoch > 0) & (epoch % args.val_intervals == 0):
+        if (epoch > 0) & ((epoch + 1) % args.val_intervals == 0):
             val_loss, tp, fp, fn, tn, precision, accuracy = val(model, val_loader, criterion, device, epoch)
             print('val loss = {}'.format(val_loss))
             log_writer.add_scalar('Val/loss', val_loss, epoch)

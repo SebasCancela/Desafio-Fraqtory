@@ -11,16 +11,16 @@ class courtDataset(Dataset):
     def __init__(self, mode, input_height=720, input_width=1280, scale=2, hp_radius=55):
 
         self.mode = mode
-        assert mode in ['train', 'val'], 'incorrect mode'
+        assert mode in ['train', 'val', 'test'], 'incorrect mode'
         self.input_height = input_height
         self.input_width = input_width
         self.output_height = int(input_height/scale)
         self.output_width = int(input_width/scale)
-        self.num_joints = 14
+        self.num_joints = 8
         self.hp_radius = hp_radius
         self.scale = scale
 
-        self.path_dataset = './data'
+        self.path_dataset = './augmented_data'
         self.path_images = os.path.join(self.path_dataset, 'images')
         with open(os.path.join(self.path_dataset, 'data_{}.json'.format(mode)), 'r') as f:
             self.data = json.load(f)

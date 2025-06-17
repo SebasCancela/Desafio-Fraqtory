@@ -50,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_homography', action='store_true', help='whether to use homography postprocessing')
     args = parser.parse_args()
 
-    model = BallTrackerNet(out_channels=15)
+    model = BallTrackerNet(out_channels=9)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = model.to(device)
     model.load_state_dict(torch.load(args.model_path, map_location=device))
@@ -71,10 +71,10 @@ if __name__ == '__main__':
         pred = F.sigmoid(out).detach().cpu().numpy()
 
         points = []
-        for kps_num in range(14):
+        for kps_num in range(8):
             heatmap = (pred[kps_num] * 255).astype(np.uint8)
             x_pred, y_pred = postprocess(heatmap, low_thresh=170, max_radius=25)
-            if args.use_refine_kps and kps_num not in [8, 12, 9] and x_pred and y_pred:
+            if args.use_refine_kps and x_pred and y_pred:
                 x_pred, y_pred = refine_kps(image, int(y_pred), int(x_pred))
             points.append((x_pred, y_pred))
 

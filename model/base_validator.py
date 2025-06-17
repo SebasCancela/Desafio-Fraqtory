@@ -24,7 +24,7 @@ def val(model, val_loader, criterion, device, epoch):
 
             pred = F.sigmoid(out).detach().cpu().numpy()
             for bs in range(batch_size):
-                for kps_num in range(14):
+                for kps_num in range(8):
                     heatmap = (pred[bs][kps_num] * 255).astype(np.uint8)
                     x_pred, y_pred = postprocess(heatmap)
                     x_gt = kps[bs][kps_num][0].item()
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         pin_memory=True
     )
 
-    model = BallTrackerNet(out_channels=15)
+    model = BallTrackerNet(out_channels=9)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.load_state_dict(torch.load(args.model_path, map_location=device))
     model = model.to(device)
